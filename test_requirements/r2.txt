@@ -1,0 +1,41 @@
+{
+UUID => undef ,
+TYPE => 'requirement',
+ABSTRACTION_LEVEL => 'system',
+
+ORIGINS => [	],
+CREATORS => ['nadim'],
+
+CATEGORIES => ['Security'],
+NAME => 'XX',
+
+DESCRIPTION => 'XX',
+
+LONG_DESCRIPTION => <<"END_OF_LONG_DESCRIPTION",
+END_OF_LONG_DESCRIPTION
+
+RATIONALE => <<"END_OF_RATIONAL",
+
+somethiiing
+
+END_OF_RATIONAL
+
+FIT_CRITERIA => <<"END_OF_LONG_FIT_CRITERIA",
+END_OF_LONG_FIT_CRITERIA
+
+SATISFACTION => 5, # [1-5] 1 = user doesn't really care .. 5 = user will be very satisfied if implemented
+DISSATISFACTION => 5,  # [1-5] 1 = user doesn't really care .. 5 = user will be very displeased if not implemented
+
+DOCUMENTATION_LINKS =>[],
+
+SUB_REQUIREMENTS => 
+	[
+	'r3',
+	],
+
+REVIEWED => 0,
+
+IMPLEMENTATION_STATE => 0,
+IMPLEMENTATION_PRIORITY => undef,
+}
+

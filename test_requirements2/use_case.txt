@@ -1,0 +1,34 @@
+{
+UUID => undef ,
+TYPE => 'use case',
+
+ABSTRACTION_LEVEL => 'system',
+
+ORIGINS => [	],
+CREATORS => ['nadim'],
+
+NAME => 'use_case',
+
+DESCRIPTION => 'a use case',
+
+PRECONDITIONS => ['something', 'something else'],
+ACTORS_INTERESTS => ['someone', 'someone else'],
+DEFINITION => ['what is this supposed to contain?'],
+
+SATISFACTION => 5, # [1-5] 1 = user doesn't really care .. 5 = user will be very satisfied if implemented
+DISSATISFACTION => 5,  # [1-5] 1 = user doesn't really care .. 5 = user will be very displeased if not implemented
+
+RELATED_REQUIREMENTS => [],
+
+DOCUMENTATION_LINKS =>[],
+
+SUB_REQUIREMENTS => 
+	[
+	'ABC',
+	],
+
+REVIEWED => 0,
+
+IMPLEMENTATION_STATE => 0,
+IMPLEMENTATION_PRIORITY => undef,
+}

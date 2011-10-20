@@ -1,0 +1,127 @@
+#!/usr/bin/perl
+
+package App::Chained::RA ;
+
+use strict ;
+use warnings ;
+use Carp ;
+
+use parent 'App::Chained' ;
+
+our $VERSION = '0.02' ;
+
+=head1 NAME
+	
+ra - Wrapper around B<App::Requirement::Arch> commands
+
+=head1 SYNOPSIS
+
+ $> ra [--version] [--help] COMMAND [ARGS]
+
+ $> ra command [options]
+ $> ra help
+ $> ra help command
+
+=head1 DESCRIPTION
+
+The B<ra > application allows you to easilly access B<App::Requirement::Arch> commands. It provides help, apropos, faq and bash completion
+script to the commands.
+
+=head2 Bash completion script
+
+You can generate a completion script by running the following command
+
+ $> ra --generate_bash_completion 1> ra_perl_completion.pl 2> ra_completion
+ $> chmod a+x ra_perl_completion.pl
+ $> mv ra_perl_completion.pl somwhere/in/your/$PATH
+ $> source ra_completion 
+ 
+=head1 AUTHORS
+
+ Khemir Nadim ibn Hamouda
+
+=cut
+
+sub run
+{
+my ($invocant, @setup_data) = @_ ;
+
+my $class = ref($invocant) || $invocant ;
+confess 'Invalid constructor call!' unless defined $class ;
+
+my $chained_app = 
+	App::Chained->new
+		(
+		INTERACTION => {WARN => sub {warn @_}},
+		version =>  $VERSION,
+		
+		help => \&App::Chained::get_help_from_pod, 
+
+		apropos => undef,
+		faq => undef,
+		usage => <<USAGE,
+Usage: 
+
+  ra [--version] [--help] COMMAND [ARGS]
+
+  ra --generate_bash_completion 1> ra_perl_completion.pl 2> ra_completion
+  
+USAGE
+		getopt_data => 	
+			[
+			],
+		
+		sub_apps =>
+			{
+			check => get_sub_app('ra_check.pl', 'check the requirements format against the master requirement template.'),
+			edit => get_sub_app('ra_edit.pl','open the requirement in a text editor, creating it from templates'),
+			new_batch => get_sub_app('ra_new_batch.pl','create requirements, in batch mode'),
+			new => get_sub_app('ra_new.pl','create a requirement in the file passed as argument'),
+			show_flat => get_sub_app('ra_show_flat.pl',"Generates a 'flat' document where the requiremetns are listed without hierarchical relationship"),
+			show => get_sub_app('ra_show.pl','Generates a document reflecting the requirements hierarchy'),
+			show_by_abstraction => get_sub_app('ra_show_sorted_by_abstraction_level.pl','Generates a with the requirements sorted by abstraction level'),
+			show_usecases => get_sub_app('ra_show_usecases.pl','Generates a dhtml document for the use cases.'),
+			spellcheck => get_sub_app('ra_spellcheck.pl','run aspell on the contents of the requirements'),
+			},
+			
+		@setup_data,
+		) ;
+
+bless $chained_app, $class ;
+
+$chained_app->parse_command_line() ;
+
+#~ use Data::TreeDumper ;
+#~ print DumpTree $chained_app->{command_options}, 'options' ;
+
+# run the command if we so want
+$chained_app->SUPER::run() ;
+}
+
+sub get_sub_app
+{
+my ($name, $description, $apropos) = @_ ;
+
+return	
+	{
+	description => $description,
+	run =>
+		sub
+		{
+		my ($self, $command, $arguments) =  @_ ;
+		system $name . ' ' . join(' ', @{$arguments}) ;
+		},
+		
+	help => sub {system "$name --help"},
+	apropos => [defined $apropos ? @{$apropos} : 'no apropos'],
+	
+	options => sub {return `$name --dump_options`},
+	}
+}
+
+#---------------------------------------------------------------------------------
+
+package main ;
+
+App::Chained::RA->run(command_line_arguments => \@ARGV) ;
+

@@ -1,0 +1,23 @@
+{
+'UUID' => undef,
+'TYPE' => 'requirement',
+'ABSTRACTION_LEVEL' => 'system',
+'ORIGINS' => [
+''
+],
+'CREATORS' => [],
+'CATEGORIES' => ['zzz'],
+'NAME' => 'nadim',
+'DESCRIPTION' => '',
+'LONG_DESCRIPTION' => '',
+'RATIONALE' => '',
+'FIT_CRITERIA' => '',
+'SATISFACTION' => 'undef',
+'DISSATISFACTION' => 'undef',
+'DOCUMENTATION_LINKS' => [],
+'RELATED_REQUIREMENTS' => [],
+'SUB_REQUIREMENTS' => [],
+'REVIEWED' => 0,
+'IMPLEMENTATION_STATE' => undef,
+'IMPLEMENTATION_PRIORITY' => undef
+};

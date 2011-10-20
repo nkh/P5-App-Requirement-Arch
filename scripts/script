@@ -1,0 +1,62 @@
+#!/usr/bin/perl
+
+use strict ;
+use warnings ;
+use Carp ;
+
+=head1 NAME 
+
+ $> script - 
+
+=head1 USAGE
+
+ $> script command switch switch ...
+
+
+=head1 OPTIONS
+
+
+=head1 EXIT STATUS
+
+
+=head1 AUTHOR
+
+	Nadim ibn hamouda el Khemir
+	CPAN ID: NKH
+	mailto: nkh@cpan.org
+
+=cut
+
+#------------------------------------------------------------------------------------------------------------------------
+
+use IO::Select ;
+
+our $VERSION = '0.01' ;
+
+#------------------------------------------------------------------------------------------------------------------------
+
+my @extra_options ;
+my $io_select = IO::Select->new(\*STDIN) ;
+
+if($io_select->can_read(0))
+	{
+	@extra_options = <STDIN> ; ## no critic (InputOutput::ProhibitExplicitStdin)
+	chomp @extra_options ;
+	}
+	
+for(@ARGV)
+	{
+	display_help() if $_ eq '--help' ;
+	}
+	
+my @command_and_options = (@ARGV, @extra_options) ;
+
+display_help() unless @command_and_options ;
+
+#------------------------------------------------------------------------------------------------------------------------
+
+sub display_help
+{ 
+print {STDERR} `perldoc $0`  or croak 'Can\'t display help!' ; ## no critic (InputOutput::ProhibitBacktickOperators)
+exit(1) ;
+}
