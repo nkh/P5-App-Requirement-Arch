@@ -1,6 +1,16 @@
 Build
+!Build/
 Changes
 Debian_CPANTS.txt
 _build/
 blib/
-
+.directory
+META.yml
+MYMETA.json
+MYMETA.yml
+Version.pm
+archive/
+html/
+ra_aspell_dictionary
+ra_completion
+ra_perl_completion.pl
