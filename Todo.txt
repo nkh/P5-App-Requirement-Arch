@@ -2,6 +2,30 @@
 # This is Todo.txt #
 #------------------#
 
+Spellchecking
+	- display the line for the error
+	- possibly group the errors
+
+# Violations:
+# |- errors
+# |  `- 0 = NAME field and file name mismatch
+# `- spellchecking_errors
+#    |- 0 = UUID
+#    |- 1 = undef
+#    |- 2 = nadim
+#    |- 3 = undef
+#    |- 4 = undef
+#    |- 5 = undef
+#    `- 6 = undef
+
+script to handle sub requirements that do not exist
+	- list them
+	- count them
+	-create them 
+		- in a subdirectory
+		- in the same directory as their parents if all parents are in the same directory
+		- directory in the requirement directory structure that corresponds to the req. catagory
+
 use Text::Aspell, seems that the implementation to find errors in the file name is broken
 	get user dictionary from ~/.ra
 	

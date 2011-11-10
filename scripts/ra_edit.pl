@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 use strict ;
 use warnings ;
@@ -154,7 +154,7 @@ else
 		
 		if(exists $violations->{$free_form_template})
 			{
-			croak DumpTree $violations->{$free_form_template}, "Error: free form template has errors:" ;
+			croak DumpTree $violations->{$free_form_template}, "Error: free form template has errors, aborting:" ;
 			}
 		else
 			{
