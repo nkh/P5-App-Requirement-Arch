@@ -35,6 +35,7 @@ use App::Requirement::Arch::Requirements qw(get_files_to_check)  ;
 use IPC::Open2;
 use File::Slurp ;
 use File::HomeDir ;
+use File::Path qw(make_path) ;
 
 #-------------------------------------------------------------------------------
 
@@ -116,17 +117,17 @@ unless ($user_dictionary)
 
 my $use_user_dictionary = '' ;
 
-#todo use dictionary from ~/.ra. Create a default one if necessary, with comment on the format
-
 $user_dictionary ||= 'ra_spellcheck_dictionary.txt' ;
 
 if(-f $user_dictionary)
 	{
-	$use_user_dictionary = '--extra-dicts ./ra_aspell_dictionary' ;
+	make_path('/tmp/ra') ;
+
+	$use_user_dictionary = '--extra-dicts /tmp/ra/ra_aspell_dictionary' ;
 
 	if($regenerate_user_dictionary)
 		{
-		`aspell --lang=en create master ./ra_aspell_dictionary < $user_dictionary` ;
+		`aspell --lang=en create master /tmp/ra/ra_aspell_dictionary < $user_dictionary` ;
 		}
 	}
 else
@@ -156,7 +157,7 @@ while(<OUT>)
 	else
 		{
 		chomp ;
-		push @{$errors{$file}}, $_ ;
+		$errors{$file}{$_}++ ;
 		}
 	}
 

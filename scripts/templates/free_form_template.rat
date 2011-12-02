@@ -10,7 +10,9 @@
 'NAME' => 'free_form_template',
 
 'DESCRIPTION' => '',
-'LONG_DESCRIPTION' => '',
+'LONG_DESCRIPTION' => 'EOD',
+EOD
+
 'RATIONALE' => 'Very important, please fill',
 'FIT_CRITERIA' => '',
 

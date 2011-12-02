@@ -45,6 +45,7 @@ ARGUMENTS
   --no_check_categories      do not check the requirement categories
   --no_spellcheck            perform no spellchecking
   --no_backup                do not save a backup file
+  --no_file_ok               do nothing if no path to requirement is given
 
 FILES
 	~/.ra/templates/master_template.pl
@@ -62,7 +63,7 @@ exit(1) ;
 #------------------------------------------------------------------------------------------------------------------
 
 my ($master_template_file, $master_categories_file, $free_form_template) ;
-my ($no_spellcheck, $raw, $no_backup, $no_check_categories) ;
+my ($no_spellcheck, $raw, $no_backup, $no_check_categories, $no_file_ok) ;
 
 die 'Error parsing options!'unless 
 	GetOptions
@@ -74,6 +75,7 @@ die 'Error parsing options!'unless
 		'raw=s' => \$raw,
 		'no_backup' => \$no_backup,
 		'no_check_categories' => \$no_check_categories,
+		'no_file_ok' => \$no_file_ok,
 		'h|help' => \&display_help, 
 		
 		'dump_options' => 
@@ -88,6 +90,7 @@ die 'Error parsing options!'unless
 					raw
 					no_backup
 					no_check_categories
+					no_file_ok
 					help
 					) ;
 					
@@ -99,7 +102,12 @@ die 'Error parsing options!'unless
 ($master_template_file, $master_categories_file, $free_form_template)  
 	= get_template_files($master_template_file, $master_categories_file, $free_form_template)   ;
 
-display_help() unless @ARGV == 1;
+unless(@ARGV == 1)
+	{
+	display_help() unless $no_file_ok ;
+	exit(0) ;
+	}
+
 my $requirement_file = $ARGV[0] ;
 
 my $requirement_text = $EMPTY_STRING ;
@@ -160,7 +168,7 @@ else
 			{
 			$requirement_text = read_file($free_form_template) ;
 			
-			$requirement_text =~ s/NAME\s+=>\s'[^']*'/NAME => '$requirement_name'/ ;
+			$requirement_text =~ s/'NAME'\s+=>\s'[^']*'/NAME => '$requirement_name'/ ;
 			}
 		}
 	else

@@ -2,9 +2,9 @@
 # This is Todo.txt #
 #------------------#
 
-Spellchecking
-	- display the line for the error
-	- possibly group the errors
+script to extract fields from requirements
+	- fields to extract ar passed as arguments
+	- optionaly prepend the requirement path to the output to allow piping
 
 # Violations:
 # |- errors
@@ -21,10 +21,12 @@ Spellchecking
 script to handle sub requirements that do not exist
 	- list them
 	- count them
-	-create them 
+	- create them 
 		- in a subdirectory
 		- in the same directory as their parents if all parents are in the same directory
 		- directory in the requirement directory structure that corresponds to the req. catagory
+
+	- best would be to have ra extract sub_requirements | xargs -n 1 ra new 
 
 use Text::Aspell, seems that the implementation to find errors in the file name is broken
 	get user dictionary from ~/.ra

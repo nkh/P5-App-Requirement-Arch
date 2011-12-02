@@ -5,10 +5,12 @@ use warnings ;
 use Carp ;
 
 use App::Requirement::Arch::Requirements qw(create_requirement)  ;
-use App::Requirement::Arch qw(load_master_template) ;
+use App::Requirement::Arch qw(get_template_files load_master_template) ;
 
 use File::Slurp ;
 use File::Basename ;
+use File::Path qw(make_path) ;
+
 use Text::Pluralize;
 
 use Data::Dumper ;
@@ -25,7 +27,7 @@ NAME
 
 SYNOPSIS
 
-	$ ra_new_batch.pl --master_template_file template_file batch_requirement_file
+	$ ra_new_batch.pl [--master_template_file template_file] batch_requirement_file output_directory
 
 DESCRIPTION
 	This utility will create requirements, in batch mode, the content of the batch file is:
@@ -73,10 +75,11 @@ die 'Error parsing options!'unless
 				},
 		) ;
 
-
-display_help() unless defined $master_template_file ;
+($master_template_file)  = get_template_files($master_template_file)   ;
 
 my $batch_file_name = $ARGV[0] || die display_help() ;
+my $output_directory = $ARGV[1] || die display_help() ;
+make_path($output_directory) ;
 
 open my $batch_file , '<', $batch_file_name or die "Can't open '$batch_file_name': $!" ;
 
@@ -92,7 +95,7 @@ while(<$batch_file>)
 		{
 		if(defined $title)
 			{
-			create_new_batch_requirement($master_template_file, $title, $batch_file_name, $description) ;
+			create_new_batch_requirement($master_template_file, $output_directory, $title, $batch_file_name, $description) ;
 			$number_of_requirements_created++ ;
 			undef $title ;
 			}
@@ -112,7 +115,7 @@ while(<$batch_file>)
 
 if(defined $title)
 	{
-	create_new_batch_requirement($master_template_file, $title, $batch_file_name, $description)  ;
+	create_new_batch_requirement($master_template_file, $output_directory, $title, $batch_file_name, $description)  ;
 	$number_of_requirements_created++ ;
 	}
 
@@ -122,12 +125,12 @@ print {*STDOUT} pluralize("Created $number_of_requirements_created requirement(s
 
 sub create_new_batch_requirement
 {
-my ($master_template_file, $title, $batch_file_name, $description) = @_ ;
+my ($master_template_file, $output_directory, $title, $batch_file_name, $description) = @_ ;
 
 create_new_requirement
 	(
 	$master_template_file,
-	$title . '.rat' ,
+	$output_directory . '/' . $title . '.rat' ,
 	{
 		NAME => $title,
 		ORIGINS =>[$batch_file_name],
