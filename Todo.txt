@@ -2,6 +2,9 @@
 # This is Todo.txt #
 #------------------#
 
+when displaying an error in the data, also display how it should look
+	allows the user to cut paste the solution rather than looking it up
+
 script to extract fields from requirements
 	- fields to extract ar passed as arguments
 	- optionaly prepend the requirement path to the output to allow piping

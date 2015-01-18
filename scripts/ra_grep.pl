@@ -74,12 +74,23 @@ die 'Error parsing options!'unless
 		(
 		'r|recursive' => \$max_depth,
 		'p|pattern=s' => \@patterns,
-		'l|liat' => \$as_list,
+		'l|list' => \$as_list,
 		'path' => \$full_path,
 		'silent' => \$silent,
 		's|statistics' => \$display_statistics,
 
-		'h|help' => \&display_help, 
+		'h|help' => \&display_help,
+ 
+		'dump_options' => 
+			sub 
+				{
+				print join "\n", map {"-$_"} 
+					qw(
+					recursive pattern list path silent statistics
+					help
+					) ;
+				exit(0) ;
+				},
 		) ;
 
 unless(@patterns)

@@ -75,6 +75,7 @@ USAGE
 			{
 			check => get_sub_app('ra_check.pl', 'check the requirements format against the master requirement template.'),
 			edit => get_sub_app('ra_edit.pl','open the requirement in a text editor, creating it from templates'),
+			grep => get_sub_app('ra_grep.pl','searches for word in requirements and display the matches in tree form '),
 			new_batch => get_sub_app('ra_new_batch.pl','create requirements, in batch mode'),
 			new => get_sub_app('ra_new.pl','create a requirement in the file passed as argument'),
 			show_flat => get_sub_app('ra_show_flat.pl',"Generates a 'flat' document where the requiremetns are listed without hierarchical relationship"),

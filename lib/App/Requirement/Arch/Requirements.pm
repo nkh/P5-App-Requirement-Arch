@@ -390,10 +390,7 @@ my ($ok_parsed, $requirements_with_errors, %all_violations) = (0, 0) ;
 
 for my $file (@files)
 	{
-	#~ print DumpTree $requirement, $file ;
-	
 	my ($requirement, $violations) = load_requirement($master_template, $file) ;
-	
 	if(defined $requirement) 
 		{
 		$ok_parsed++ ;
@@ -443,7 +440,7 @@ for my $source (@{$sources})
 		{
 		if(-d $source)
 			{
-			push @files, File::Find::Rule->file()->name( '*.rat' )->in($source);
+			push @files, File::Find::Rule->in($source);
 			}
 		else
 			{
@@ -452,10 +449,10 @@ for my $source (@{$sources})
 		}
 	else
 		{
-		push @files, File::Find::Rule->file()->name( '*.rat' )->in( '.' );
+		push @files, File::Find::Rule->file()->in( '.' );
 		}
 	}
-	
+
 return @files ;
 }
 
@@ -521,19 +518,26 @@ See C<xxx>.
 
 my ($master_template, $file) = @_ ;
 
-my $requirement = do $file or croak "Error: Can't load requirement '$file': $@ $!"  ;
-
 my $violations = {} ;
+
+my $requirement = do $file ; 
 
 if(defined $requirement) 
 	{
 	my $type_template = get_type_template($file, $requirement, $master_template) ;
 	
-	$violations = check_requirement_content($type_template, $requirement, $file) ;
+	if(defined $type_template)
+		{
+		$violations = check_requirement_content($type_template, $requirement, $file) ;
+		}
+	else
+		{
+		$violations->{$file}{errors} = ["Error: file missing 'TYPE' field '$file':$@\n"] ;
+		}
 	}
 else
 	{
-	$violations->{$file}{errors} = ["Error: can't parse requirement '$file':$@\n"] ;
+	$violations->{$file}{errors} = ["Error: can't parse requirement file '$file'\n"] ;
 	}
 
 $requirement->{_LOADED_FROM} = $file ;
@@ -593,12 +597,12 @@ if(defined $requirement->{TYPE})
 		}
 	else
 		{
-		croak "Invalid TYPE \"$requirement->{TYPE}\"! in '$file'"
+		warn "ERROR: Invalid TYPE \"$requirement->{TYPE}\"! in file '$file'"
 		}
 	}
 else
 	{
-	croak "Missing TYPE! in '$file'" ;
+	warn "ERROR: Missing TYPE! in '$file'" ;
 	}
 
 $type_template ;

@@ -228,6 +228,7 @@ my $build = $class->new
 		'scripts/field_filters/test_requirement_fields.pl',
 		'scripts/ra',
 		'scripts/ra_edit.pl',
+		'scripts/ra_grep.pl',
 		'scripts/ra_show.pl',
 		'scripts/ra_show_flat.pl',
 		'scripts/ra_spellcheck.pl',
