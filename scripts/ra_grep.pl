@@ -1,14 +1,13 @@
-
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 use strict ;
 use warnings;
 
 use File::Find::Rule ;
 use Data::TreeDumper ;
-use File::Spec  ;
-use Getopt::Long ;
+use File::Spec ;
 
+use Getopt::Long ;
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case') ;
 
 main() ;
@@ -23,14 +22,14 @@ NAME
   ra_grep
 
 SYNOPSIS
-  $ ra_grep -L -r -P pattern -P pattern [[path_spec]/[file_spec]] [[path_spec]/[file_spec]] ...
+  $ ra_grep -l -r -p pattern -p pattern [[path_spec]/[file_spec]] [[path_spec]/[file_spec]] ...
 
 DESCRIPTION
   This utility search for patterns in requirement files and display them. The 
     defalt output looks like the output of the 'tree' utility. When the otion -L
     is given, the output is a list and would look like the result of 
 	
-	grep -R -l -P -P path/to/requirements
+	grep -R -l -P pattern path/to/requirements
 	
 [[path_spec]/[file_spec]]
 
@@ -39,7 +38,7 @@ OPTIONS
   
   -l|list		display list of matching files without tree graph
   
-  -p|pattern pattern	match the text of the requirement file to the pattern
+  -p|pattern 		match the text of the requirement file to the pattern
 			multiple patterns are allowed
 
   --path		display full path in tree
@@ -69,7 +68,7 @@ sub main
 # option handling
 my (@patterns, $as_list, $max_depth, $full_path, $silent, $display_statistics) ;
 
-die 'Error parsing options!'unless 
+die 'Error parsing options!' unless 
 	GetOptions
 		(
 		'r|recursive' => \$max_depth,
@@ -86,7 +85,7 @@ die 'Error parsing options!'unless
 				{
 				print join "\n", map {"-$_"} 
 					qw(
-					recursive pattern list path silent statistics
+					r recursive p pattern l list path silent s statistics
 					help
 					) ;
 				exit(0) ;
@@ -102,7 +101,7 @@ unless(@patterns)
 my @sources = @ARGV ;
 push @sources , '.' unless @sources ;
 
-$max_depth = defined $max_depth ? 5000 : 0 ;
+$max_depth = defined $max_depth ? 5000 : 1 ;
 
 #-----------------------------------------------------------------------------------------------------------
 
@@ -190,6 +189,8 @@ my($statistics, $file_name,  $patterns) = @_ ;
 open my $file, '<', $file_name or die "Can't open '$file_name: $!" ;
 
 my $matched = 0 ;
+
+#todo: anti patterns, aka grep -v
 
 FILE:
 while(my $line = <$file>)

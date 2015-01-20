@@ -92,9 +92,6 @@ bless $chained_app, $class ;
 
 $chained_app->parse_command_line() ;
 
-#~ use Data::TreeDumper ;
-#~ print DumpTree $chained_app->{command_options}, 'options' ;
-
 # run the command if we so want
 $chained_app->SUPER::run() ;
 }
