@@ -38,7 +38,9 @@ OPTIONS
   
   -1|as_list		display list of matching files without tree graph
 
-  -match_file_name	matches file names to patterns, no matching to the file contents is done
+  -match_file_name	also matc the name of the file to the pattern
+
+  -only_file_name	matches file names to patterns, no matching of the file contents is done
 
   -p|pattern 		match the text of the requirement file to the pattern
 			multiple patterns are allowed, patterns are perl regex patterns
@@ -70,7 +72,7 @@ sub main
 {
 	
 # option handling
-my (@patterns, $as_list, $match_file_name, $ignore_case, $max_depth, $full_path, $silent, $display_statistics) ;
+my (@patterns, $as_list, $match_file_name, $only_file_name, $ignore_case, $max_depth, $full_path, $silent, $display_statistics) ;
 
 die 'Error parsing options!' unless 
 	GetOptions
@@ -79,6 +81,7 @@ die 'Error parsing options!' unless
 		'1|as_list' => \$as_list,
 		'p|pattern=s' => \@patterns,
 		'match_file_name' => \$match_file_name,
+		'only_file_name' =>\$only_file_name,
 		'i|ignore_case' => \$ignore_case,
 		'path' => \$full_path,
 		'silent' => \$silent,
@@ -91,7 +94,7 @@ die 'Error parsing options!' unless
 				{
 				print join "\n", map {"-$_"} 
 					qw(
-					r recursive p pattern l list path silent s statistics
+					r recursive 1 list only_file_name match_file_name p pattern i ignore_case path silent s statistics
 					help
 					) ;
 				exit(0) ;
@@ -125,7 +128,9 @@ for my $source (@sources)
 		
 		my ($volume, $directories, $file_name) = File::Spec->splitpath($file) ;	
 		
-		if(matches_regexes(\%statistics, $file, $file_name, \@patterns, $ignore_case, $match_file_name))
+		my ($matched_file_name, $matched) = matches_regexes(\%statistics, $file, $file_name, \@patterns, $ignore_case, $match_file_name, $only_file_name) ;
+
+		if($matched_file_name ||  $matched)
 			{
 			my $tree_position ;
 			
@@ -157,7 +162,9 @@ for my $source (@sources)
 				}
 			else
 				{
-				$tree_position->{$file_name} = $full_path ? $file : 1 ;
+				my $warning = ($match_file_name && ! $matched) ? '<Warning: file name matches but content does not> ' : '' ;
+
+				$tree_position->{$file_name} = $full_path ? $warning . $file : $warning ;
 				}			
 			
 			$statistics{matching_files}++ ;
@@ -190,26 +197,28 @@ return ! $statistics{matching_files} ;
 
 sub matches_regexes
 {
-my($statistics, $file, $file_name, $patterns, $ignore_case, $match_file_name) = @_ ;
+my($statistics, $file, $file_name, $patterns, $ignore_case, $match_file_name, $only_file_name) = @_ ;
 
+my $matched_file_name = 0 ;
 my $matched = 0 ;
 my $insensitive = $ignore_case ? '(?i)' : '' ;
 
 MATCHED:
-for('once'){ 
-if($match_file_name)
-	{
-	for my $grep (@{$patterns})
+for('once')
+	{ 
+	if($match_file_name || $only_file_name)
 		{
-		if($file_name =~ /$insensitive$grep/)
+		for my $grep (@{$patterns})
 			{
-			$matched++ ;
-			last MATCHED ;
+			if($file_name =~ /$insensitive$grep/)
+				{
+				$matched_file_name++ ;
+				}
 			}
 		}
-	}
-else
-	{
+	
+	last MATCHED if $only_file_name;
+
 	open my $file_handle, '<', $file or die "Can't open '$file: $!" ;
 
 	while(my $line = <$file_handle>)
@@ -223,10 +232,9 @@ else
 				}
 			}
 		}
-	}
-} #once
+	} #once
 
-return $matched ;
+return ($matched_file_name, $matched) ;
 }
 
 sub get_directory_and_file_pattern
@@ -252,7 +260,7 @@ else
 	}
 	
 $source_directory = '.' unless defined $source_directory ;
-$source_file_pattern = '*.*' unless defined $source_file_pattern ;
+$source_file_pattern = '*' unless defined $source_file_pattern ;
 
 return ($source_directory, $source_file_pattern) ;
 }
