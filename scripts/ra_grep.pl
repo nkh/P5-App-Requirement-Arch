@@ -22,7 +22,7 @@ NAME
   ra_grep
 
 SYNOPSIS
-  $ ra_grep -l -r -p pattern -p pattern [[path_spec]/[file_spec]] [[path_spec]/[file_spec]] ...
+  $ ra_grep -l -r -p pattern -i -p perl_pattern [[path_spec]/[file_spec]] [[path_spec]/[file_spec]] ...
 
 DESCRIPTION
   This utility search for patterns in requirement files and display them. The 
@@ -34,12 +34,16 @@ DESCRIPTION
 [[path_spec]/[file_spec]]
 
 OPTIONS
-  --r|recursive		read  all  files under each directory, recursively
+  -r|recursive		read  all  files under each directory, recursively
   
-  -l|list		display list of matching files without tree graph
-  
+  -1|as_list		display list of matching files without tree graph
+
+  -match_file_name	matches file names to patterns, no matching to the file contents is done
+
   -p|pattern 		match the text of the requirement file to the pattern
-			multiple patterns are allowed
+			multiple patterns are allowed, patterns are perl regex patterns
+
+  -i|ignore_case	ignore case distinction in the -p patterns
 
   --path		display full path in tree
   
@@ -66,14 +70,16 @@ sub main
 {
 	
 # option handling
-my (@patterns, $as_list, $max_depth, $full_path, $silent, $display_statistics) ;
+my (@patterns, $as_list, $match_file_name, $ignore_case, $max_depth, $full_path, $silent, $display_statistics) ;
 
 die 'Error parsing options!' unless 
 	GetOptions
 		(
 		'r|recursive' => \$max_depth,
+		'1|as_list' => \$as_list,
 		'p|pattern=s' => \@patterns,
-		'l|list' => \$as_list,
+		'match_file_name' => \$match_file_name,
+		'i|ignore_case' => \$ignore_case,
 		'path' => \$full_path,
 		'silent' => \$silent,
 		's|statistics' => \$display_statistics,
@@ -94,7 +100,7 @@ die 'Error parsing options!' unless
 
 unless(@patterns)
 	{
-	warn "Error: no pattern specified!\n" ;
+	warn "Error: no pattern specified with -p|pattern option.\n" ;
 	display_help()
 	}
 
@@ -112,14 +118,14 @@ for my $source (@sources)
 	my ($source_directory, $source_file_pattern) = get_directory_and_file_pattern($source);
 	push @{$statistics{sources}}, "$source_directory => $source_file_pattern" ;
 	
-	for my $file_name (File::Find::Rule->maxdepth($max_depth)->file()->name($source_file_pattern)->in( $source_directory))
+	for my $file (File::Find::Rule->maxdepth($max_depth)->file()->name($source_file_pattern)->in( $source_directory))
 		{
-		#~ print "Checking '$file_name\n";
+		#~ print "Checking '$file\n";
 		$statistics{files_matching_source_pattern}++ ;
 		
-		my ($volume, $directories, $file) = File::Spec->splitpath($file_name) ;	
+		my ($volume, $directories, $file_name) = File::Spec->splitpath($file) ;	
 		
-		if(matches_regexes(\%statistics, $file_name, \@patterns))
+		if(matches_regexes(\%statistics, $file, $file_name, \@patterns, $ignore_case, $match_file_name))
 			{
 			my $tree_position ;
 			
@@ -147,11 +153,11 @@ for my $source (@sources)
 			
 			if($as_list)
 				{
-				push @matches, $file_name ;
+				push @matches, $file ;
 				}
 			else
 				{
-				$tree_position->{$file} = $full_path ? $file_name : 1 ;
+				$tree_position->{$file_name} = $full_path ? $file : 1 ;
 				}			
 			
 			$statistics{matching_files}++ ;
@@ -171,7 +177,7 @@ unless($silent)
 	{
 	if($as_list)
 		{
-		print join "\n", @matches ;
+		print join( "\n", @matches), "\n" ;
 		}
 	else
 		{
@@ -184,27 +190,42 @@ return ! $statistics{matching_files} ;
 
 sub matches_regexes
 {
-my($statistics, $file_name,  $patterns) = @_ ;
-
-open my $file, '<', $file_name or die "Can't open '$file_name: $!" ;
+my($statistics, $file, $file_name, $patterns, $ignore_case, $match_file_name) = @_ ;
 
 my $matched = 0 ;
+my $insensitive = $ignore_case ? '(?i)' : '' ;
 
-#todo: anti patterns, aka grep -v
-
-FILE:
-while(my $line = <$file>)
+MATCHED:
+for('once'){ 
+if($match_file_name)
 	{
 	for my $grep (@{$patterns})
 		{
-		if($line =~ $grep)
+		if($file_name =~ /$insensitive$grep/)
 			{
 			$matched++ ;
-			last FILE ;
+			last MATCHED ;
 			}
 		}
 	}
-	
+else
+	{
+	open my $file_handle, '<', $file or die "Can't open '$file: $!" ;
+
+	while(my $line = <$file_handle>)
+		{
+		for my $grep (@{$patterns})
+			{
+			if($line =~ /$insensitive$grep/)
+				{
+				$matched++ ;
+				last MATCHED ;
+				}
+			}
+		}
+	}
+} #once
+
 return $matched ;
 }
 
