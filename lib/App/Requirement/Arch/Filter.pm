@@ -106,7 +106,7 @@ my
 	
 my ($requirements_structure, $requirements, $categories, $ok_parsed, $errors) = get_requirements_structure($sources, $master_template_file) ;
 
-die "Error: Failed requirements parsing!" if $errors ;
+warn "Error: Failed requirements parsing. Errors: $errors" if $errors ;
 
 for my $category_name (keys %{$categories})
 	{

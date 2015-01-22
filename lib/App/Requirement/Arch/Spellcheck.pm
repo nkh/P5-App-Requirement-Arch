@@ -54,7 +54,7 @@ use File::Path qw(make_path) ;
 sub spellcheck
 {
 
-=head2 spellcheck(\@sources, $user_dictionary)
+=head2 spellcheck(\@sources, $user_dictionary, $display_dictionary_search)
 
 I<Arguments>
 
@@ -74,7 +74,9 @@ See C<xxx>.
 
 =cut
 
-my ($sources, $user_dictionary) = @_ ;
+my ($sources, $user_dictionary, $display_dictionary_search) = @_ ;
+
+$user_dictionary ||= get_dictionary( $display_dictionary_search) ;
 
 my @files_to_check = get_files_to_check($sources) ;
 
@@ -88,36 +90,44 @@ return $file_name_errors, $errors_per_file ;
 
 use Cwd ;
 
+sub get_dictionary
+{
+my ($display_dictionary_search) = @_ ;
+
+my (@parent_directories, $user_dictionary) ;
+
+my $previous_path = '' ;
+for (grep {$_} split /\//, cwd())
+	{
+	unshift @parent_directories, "$previous_path/$_" ;
+	$previous_path = "$previous_path/$_"
+	}
+     
+for my $directory (@parent_directories, File::HomeDir->my_home . '/.ra')
+	{    
+	print "INFO: potential disctionary directory '$directory'\n" if $display_dictionary_search ;
+
+	my $potential_dictionary = $directory . '/ra_spellcheck_dictionary.txt' ; 
+	
+	if( -f $potential_dictionary)
+		{
+		$user_dictionary = $potential_dictionary ;
+		last ;
+		}
+	}    
+
+$user_dictionary ||= 'ra_spellcheck_dictionary.txt' ;
+	
+print "INFO: using dictionary '$user_dictionary'.\n" if $display_dictionary_search ;
+
+return $user_dictionary ;
+}
+
 sub spellcheck_data
 {
 my ($files_to_check, $data_provider, $user_dictionary, $regenerate_user_dictionary) = @_ ;
 
-unless ($user_dictionary)
-	{
-	my @parent_directories ;
-
-	my $previous_path = '' ;
-	for (grep {$_} split /\//, cwd())
-		{
-		unshift @parent_directories, "$previous_path/$_" ;
-		$previous_path = "$previous_path/$_"
-		}
-	     
-	for my $directory (@parent_directories, File::HomeDir->my_home . '/.ra')
-		{    
-		my $potential_dictionary = $directory . '/ra_spellcheck_dictionary.txt' ; 
-		
-		if( -f $potential_dictionary)
-			{
-			$user_dictionary = $potential_dictionary ;
-			last ;
-			}
-		}    
-	}
-
 my $use_user_dictionary = '' ;
-
-$user_dictionary ||= 'ra_spellcheck_dictionary.txt' ;
 
 if(-f $user_dictionary)
 	{
@@ -156,6 +166,8 @@ while(<OUT>)
 		}
 	else
 		{
+		next unless $file ;
+
 		chomp ;
 		$errors{$file}{$_}++ ;
 		}

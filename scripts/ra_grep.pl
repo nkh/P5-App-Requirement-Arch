@@ -50,10 +50,12 @@ OPTIONS
   --path		display full path in tree
   
   --s|statistics	display some search statistics
+
+  --summary		display a one line summary after the tree
   
   --silent		no display, useful with option --statistics
   
-  --h|help		displays this help message
+  -h|help		displays this help message
   
 Output
   The document is output on STDOUT.
@@ -72,7 +74,7 @@ sub main
 {
 	
 # option handling
-my (@patterns, $as_list, $match_file_name, $only_file_name, $ignore_case, $max_depth, $full_path, $silent, $display_statistics) ;
+my (@patterns, $as_list, $match_file_name, $only_file_name, $ignore_case, $max_depth, $full_path, $silent, $display_statistics, $summary) ;
 
 die 'Error parsing options!' unless 
 	GetOptions
@@ -86,6 +88,7 @@ die 'Error parsing options!' unless
 		'path' => \$full_path,
 		'silent' => \$silent,
 		's|statistics' => \$display_statistics,
+		'summary' => \$summary,
 
 		'h|help' => \&display_help,
  
@@ -94,7 +97,7 @@ die 'Error parsing options!' unless
 				{
 				print join "\n", map {"-$_"} 
 					qw(
-					r recursive 1 list only_file_name match_file_name p pattern i ignore_case path silent s statistics
+					r recursive 1 list only_file_name match_file_name p pattern i ignore_case path silent s statistics summary
 					help
 					) ;
 				exit(0) ;
@@ -190,6 +193,12 @@ unless($silent)
 		{
 		print DumpTree \%tree, 'Matches:', DISPLAY_ADDRESS => 0 ;
 		}
+		
+	print 'Summary: ' . 
+		'match:' . $statistics{matching_files} . 
+		', files:' . $statistics{files_matching_source_pattern} . 
+		', directories:'  . $statistics{directories_matching_source_pattern} . "\n" 
+			if $summary ;
 	}
 	
 return ! $statistics{matching_files} ;

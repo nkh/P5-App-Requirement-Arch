@@ -91,7 +91,7 @@ my ($ok_parsed, $errors, $entries_with_wrong_type, $requirements_structure, $cat
 
 for my $file (get_files_to_check($sources))
 	{
-	(my $requirement) = load_requirement($master_template, $file) ;
+	my ($requirement, $violations) = load_requirement($master_template, $file) ;
 	
 	unless (defined $requirement)
 		{
@@ -99,9 +99,9 @@ for my $file (get_files_to_check($sources))
 		next ; 
 		} 
 	
-	unless($requirement->{TYPE} eq 'requirement')
+	if(! exists $requirement->{TYPE} || $requirement->{TYPE} ne 'requirement')
 		{
-		warn "Warning: Ignoring '$requirement->{NAME}' with type '$requirement->{TYPE}'\n" ;
+		warn "Warning: Ignoring requirement defined in file '$file'\n" ;
 		$entries_with_wrong_type++ ;
 		next ;
 		}
@@ -151,7 +151,7 @@ EOE
 		}
 	
 	# handle categorization, note that category inheritance is handle by a different sub
-	if (@{$requirement->{CATEGORIES}})
+	if (defined $requirement->{CATEGORIES}&& @{$requirement->{CATEGORIES}})
 		{
 		for my $category (@{$requirement->{CATEGORIES}})
 			{
@@ -391,6 +391,7 @@ my ($ok_parsed, $requirements_with_errors, %all_violations) = (0, 0) ;
 for my $file (@files)
 	{
 	my ($requirement, $violations) = load_requirement($master_template, $file) ;
+
 	if(defined $requirement) 
 		{
 		$ok_parsed++ ;
@@ -440,7 +441,7 @@ for my $source (@{$sources})
 		{
 		if(-d $source)
 			{
-			push @files, File::Find::Rule->in($source);
+			push @files, File::Find::Rule->file()->in($source);
 			}
 		else
 			{

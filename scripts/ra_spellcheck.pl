@@ -21,7 +21,7 @@ NAME
 
 SYNOPSIS
 
-	$ perl ra_spellcheck path/to/requirements [[path/to/requirements] ...]
+	$ perl ra_spellcheck [--display_dictionary_search] [--user_dictionary dictionary_file] path/to/requirements [[path/to/requirements] ...]
 
 DESCRIPTION
 	This script will run aspell on the contents of the requirements passed
@@ -45,21 +45,24 @@ exit(1) ;
 
 #---------------------------------------------------------------------------------------------------------------------
 
-my ($user_dictionary)  ;
+my ($user_dictionary, $display_dictionary_search)  ;
 
 croak 'Error parsing options!'unless 
 	GetOptions
 		(
 		'h|help' => \&display_help, 
 		'user_dictionary=s' => \$user_dictionary,
-		
+		'display_dictionary_search' => \$display_dictionary_search,
+ 	
 		'dump_options' => 
 			sub 
 				{
 				print join "\n", map {"-$_"} 
 					qw(
 					user_dictionary
-					help
+					display_dictionary_search
+					user_dictionary
+ 					help
 					) ;
 				exit(0) ;
 				},
@@ -67,7 +70,7 @@ croak 'Error parsing options!'unless
 
 @ARGV || die display_help() ;
 
-my ($file_name_errors, $errors_per_file) = spellcheck(\@ARGV) ;
+my ($file_name_errors, $errors_per_file) = spellcheck(\@ARGV, $user_dictionary, $display_dictionary_search) ;
 
 print DumpTree $file_name_errors, 'File name spelling errors:', DISPLAY_ADDRESS => 0 if scalar(keys %{$file_name_errors}) ;
 print DumpTree $errors_per_file, 'Spelling errors per file:', DISPLAY_ADDRESS => 0 if scalar(keys %{$errors_per_file}) ;
