@@ -59,14 +59,27 @@ my $chained_app =
 
 		apropos => undef,
 		faq => undef,
-		usage => <<USAGE,
-Usage: 
+		usage => <<END_OF_USAGE,
+
+NAME
+
+  ra
+
+SYNOPSIS
 
   ra [--version] [--help] COMMAND [ARGS]
 
   ra --generate_bash_completion 1> ra_perl_completion.pl 2> ra_completion
-  
-USAGE
+
+DESCRIPTION
+
+  Front end to applications from the App::Requirement::Arch module
+
+ENVIRONMENT VARIABLES
+
+  RA_DEBUG_DISPLAY_SEARCH
+
+END_OF_USAGE
 		getopt_data => 	
 			[
 			],

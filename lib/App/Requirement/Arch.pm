@@ -9,7 +9,7 @@ BEGIN
 {
 use Sub::Exporter -setup => 
 	{
-	exports => [ qw(get_template_files load_master_template load_master_categories) ],
+	exports => [ qw(get_template_files load_master_template load_master_categories get_setup_file) ],
 	groups  => 
 		{
 		all  => [ qw() ],
@@ -28,6 +28,7 @@ use Readonly ;
 Readonly my $EMPTY_STRING => q{} ;
 
 use Carp qw(carp croak confess) ;
+use File::HomeDir ;
 
 #-------------------------------------------------------------------------------
 
@@ -471,6 +472,51 @@ The requirements are sorted on its top category
 
 #-------------------------------------------------------------------------------
 
+use Cwd ;
+
+sub get_setup_file
+{
+my ($file_name, $display_search) = @_ ;
+
+$display_search++ if exists $ENV{RA_DEBUG_DISPLAY_SEARCH} ;
+
+my (@parent_directories, $found_file) ;
+
+if(-f $file_name)
+	{
+	$found_file = $file_name ;
+	}
+else
+	{
+	my $previous_path = '' ;
+	for (grep {$_} split /\//, cwd())
+		{
+		unshift @parent_directories, "$previous_path/$_" ;
+		$previous_path = "$previous_path/$_"
+		}
+	     
+	for my $directory (@parent_directories, home() . '/.ra', home() . '/.ra/templates', )
+		{    
+		print "INFO: potential directory '$directory'\n" if $display_search ;
+
+		my $potential_file = $directory . '/' . $file_name ; 
+		
+		if( -f $potential_file)
+			{
+			$found_file = $potential_file ;
+			last ;
+			}
+		}    
+
+	$found_file ||= $file_name ;
+	}
+	
+print "INFO: using '$found_file'.\n" if $display_search ;
+
+return $found_file ;
+}
+
+
 sub get_template_files_from_directory
 {
 
@@ -496,18 +542,17 @@ See C<xxx>.
 
 =cut
 
-my ($directory, $master_template_file, $master_categories_file, $free_form_template) =  @_ ;
+my ($master_template_file, $master_categories_file, $free_form_template) =  @_ ;
 
-$master_template_file = $directory . '/master_template.pl'  unless(defined $master_template_file) ;
-$master_categories_file = $directory . '/master_categories.pl'  unless(defined $master_categories_file) ;
-$free_form_template = $directory . '/free_form_template.rat'  unless(defined $free_form_template) ;
+$free_form_template = get_setup_file('free_form_template.rat')  unless(defined $free_form_template) ;
+$master_template_file = get_setup_file('master_template.pl')  unless(defined $master_template_file) ;
+$master_categories_file = get_setup_file('master_categories.pl')  unless(defined $master_categories_file) ;
 
 return($master_template_file, $master_categories_file, $free_form_template) ;
 }
 
 #-------------------------------------------------------------------------------
 
-use File::HomeDir ;
 
 sub get_template_files
 {
@@ -536,7 +581,7 @@ See C<xxx>.
 
 my ($master_template_file, $master_categories_file, $free_form_template) =  @_ ;
 
-return get_template_files_from_directory(home() . '/.ra/templates', $master_template_file, $master_categories_file, $free_form_template) ;
+return get_template_files_from_directory($master_template_file, $master_categories_file, $free_form_template) ;
 }
 
 #--------------------------------------------------------------------------------------------------------------

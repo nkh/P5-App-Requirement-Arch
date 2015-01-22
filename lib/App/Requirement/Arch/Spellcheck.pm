@@ -31,6 +31,7 @@ use English qw( -no_match_vars ) ;
 use Readonly ;
 Readonly my $EMPTY_STRING => q{} ;
 
+use App::Requirement::Arch qw(get_setup_file)  ;
 use App::Requirement::Arch::Requirements qw(get_files_to_check)  ;
 use IPC::Open2;
 use File::Slurp ;
@@ -76,7 +77,7 @@ See C<xxx>.
 
 my ($sources, $user_dictionary, $display_dictionary_search) = @_ ;
 
-$user_dictionary ||= get_dictionary( $display_dictionary_search) ;
+$user_dictionary ||= get_setup_file('ra_spellcheck_dictionary.txt', $display_dictionary_search) ;
 
 my @files_to_check = get_files_to_check($sources) ;
 
@@ -87,41 +88,6 @@ return $file_name_errors, $errors_per_file ;
 }
 
 #-------------------------------------------------------------------------------------------------------------------
-
-use Cwd ;
-
-sub get_dictionary
-{
-my ($display_dictionary_search) = @_ ;
-
-my (@parent_directories, $user_dictionary) ;
-
-my $previous_path = '' ;
-for (grep {$_} split /\//, cwd())
-	{
-	unshift @parent_directories, "$previous_path/$_" ;
-	$previous_path = "$previous_path/$_"
-	}
-     
-for my $directory (@parent_directories, File::HomeDir->my_home . '/.ra')
-	{    
-	print "INFO: potential disctionary directory '$directory'\n" if $display_dictionary_search ;
-
-	my $potential_dictionary = $directory . '/ra_spellcheck_dictionary.txt' ; 
-	
-	if( -f $potential_dictionary)
-		{
-		$user_dictionary = $potential_dictionary ;
-		last ;
-		}
-	}    
-
-$user_dictionary ||= 'ra_spellcheck_dictionary.txt' ;
-	
-print "INFO: using dictionary '$user_dictionary'.\n" if $display_dictionary_search ;
-
-return $user_dictionary ;
-}
 
 sub spellcheck_data
 {

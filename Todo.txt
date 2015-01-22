@@ -2,6 +2,9 @@
 # This is Todo.txt #
 #------------------#
 
+# loading master templates and master categories should find the first template in the directory hierarchy as does spellcheck
+
+
 when displaying an error in the data, also display how it should look
 	allows the user to cut paste the solution rather than looking it up
 
