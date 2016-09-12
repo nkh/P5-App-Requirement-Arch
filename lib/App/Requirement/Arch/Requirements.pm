@@ -644,6 +644,8 @@ for my $file (sort keys %{ $violations })
 	}
 
 print pluralize ("{No|%d} requirement{s||s} found. {No|%d} valid requirement{s||s}\n", scalar(@{$files}), $ok_parsed - $requirements_with_errors) ;
+
+return $requirements_with_errors ;
 }
 
 #--------------------------------------------------------------------------------------------------------------

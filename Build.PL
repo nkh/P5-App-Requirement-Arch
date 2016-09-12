@@ -200,6 +200,7 @@ my $build = $class->new
 		'Data::TreeDumper::Renderer::DHTML' => 0,
 		'Proc::InvokeEditor' => 0,		
 		
+		'IO::Capture::Stdout' => 0,
 		'Cwd' => 0,
 		'File::Basename' => 0,
 		'File::Spec' => 0,

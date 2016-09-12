@@ -105,8 +105,9 @@ bless $chained_app, $class ;
 
 $chained_app->parse_command_line() ;
 
-# run the command if we so want
-$chained_app->SUPER::run() ;
+my $exit_code = $chained_app->SUPER::run() ;
+
+exit $exit_code ;
 }
 
 sub get_sub_app
@@ -121,6 +122,25 @@ return
 		{
 		my ($self, $command, $arguments) =  @_ ;
 		system $name . ' ' . join(' ', @{$arguments}) ;
+
+		my $exit_code = $? ;
+
+		if ($? == -1)
+			{
+			print "failed to execute: $!\n";
+			}
+		elsif ($? & 127)
+			{
+			printf "child died with signal %d, %s coredump\n",
+			($? & 127),  ($? & 128) ? 'with' : 'without';
+			}
+		else 
+			{
+			#printf "child exited with value %d\n", $? >> 8;
+			$exit_code = $? >> 8 ;
+			}
+
+		return $exit_code ;
 		},
 		
 	help => sub {system "$name --help"},

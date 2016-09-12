@@ -62,5 +62,7 @@ die 'Error parsing options!'unless
 
 display_help() unless @ARGV ;
 
-check_requirements($master_template_file, \@ARGV) ;
+my $all_valid = check_requirements($master_template_file, \@ARGV) ;
+exit($all_valid) ;
+
 
