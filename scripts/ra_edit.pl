@@ -102,112 +102,117 @@ die 'Error parsing options!'unless
 ($master_template_file, $master_categories_file, $free_form_template)  
 	= get_template_files($master_template_file, $master_categories_file, $free_form_template)   ;
 
-unless(@ARGV == 1)
+my @files ;
+
+for my $requirement_file (@ARGV) 
 	{
-	display_help() unless $no_file_ok ;
-	exit(0) ;
+	my $requirement_text = $EMPTY_STRING ;
+	my $violations_text = $EMPTY_STRING ;
+
+	if( -e $requirement_file)
+		{
+		croak "Error: '$requirement_file' is not a file." unless( -f $requirement_file) ;
+		croak "Error: '$requirement_file' is not writable." unless( -w $requirement_file) ;
+		
+		eval
+			{
+			my $violations 
+				= check_requirement_file
+					(
+					$master_template_file, $master_categories_file, $requirement_file,
+					$no_spellcheck, $no_check_categories
+					) ;
+			
+			if(exists $violations->{$requirement_file})
+				{
+				$violations_text = DumpTree($violations->{$requirement_file}, 'Violations:', DISPLAY_ADDRESS => 0) ;
+				$violations_text .= "\nDo not modify the violation text above, it will be automatically removed.\n" ;
+				$violations_text =~ s/^/# /mg ;
+				}
+			} ;
+		
+		if($@)
+			{
+			$violations_text = "Error parsing the file as a requirement (this message changes the error message line numbers):\n$@\n" ;
+			$violations_text .= "\nDo not modify the violation text above, it will be automatically removed.\n" ;
+			$violations_text =~ s/^/# /mg ;
+			}
+		
+			
+		$requirement_text = $violations_text . read_file($requirement_file) ;
+		}
+	else
+		{
+		my ($requirement_name) = File::Basename::fileparse($requirement_file, ('\..*')) ;
+		
+		#todo: accept raw source
+		
+		if(defined $free_form_template)
+			{
+			my $violations 
+				= check_requirement_file
+					(
+					$master_template_file, $master_categories_file, $free_form_template,
+					$no_spellcheck, $no_check_categories
+					) ;
+			
+			if(exists $violations->{$free_form_template})
+				{
+				croak DumpTree $violations->{$free_form_template}, "Error: free form template has errors, aborting:" ;
+				}
+			else
+				{
+				$requirement_text = read_file($free_form_template) ;
+				
+				$requirement_text =~ s/'NAME'\s+=>\s'[^']*'/NAME => '$requirement_name'/ ;
+				}
+			}
+		else
+			{
+			# create requirement from master template
+
+			my $requirement_template = load_master_template($master_template_file)->{REQUIREMENT} ;
+			
+			my $requirement = create_requirement($requirement_template , {NAME => $requirement_name, ORIGINS =>['']}) ;
+			
+			$requirement_text = Dumper $requirement ;
+			$requirement_text =~ s/\$VAR1 =// ;
+			$requirement_text =~ s/^\s*//gm ;
+			}
+		}
+
+	push @files, [$requirement_file, $requirement_text, $violations_text] ;
 	}
 
-my $requirement_file = $ARGV[0] ;
-
-my $requirement_text = $EMPTY_STRING ;
-my $violations_text = $EMPTY_STRING ;
-
-if( -e $requirement_file)
-	{
-	croak "Error: '$requirement_file' is not a file." unless( -f $requirement_file) ;
-	croak "Error: '$requirement_file' is not writable." unless( -w $requirement_file) ;
 	
-	eval
+eval
+	{
+	edit_in_vi('-p', \@files) ;
+
+	for my $file (@files) 
 		{
-		my $violations 
-			= check_requirement_file
+		my ($requirement_file, $requirement_text, $violations_text, undef, $edited_requirement_text) = @{ $file } ;
+
+		# save backup, will contain the old violations
+		write_file("$requirement_file.bak", $requirement_text) unless $no_backup ;
+
+		# remove violation message
+		$edited_requirement_text =~ s/\Q$violations_text// ;
+		
+		# save edited requirement
+		write_file($requirement_file, $edited_requirement_text) ;
+
+		# check
+		my $violations = check_requirement_file
 				(
 				$master_template_file, $master_categories_file, $requirement_file,
 				$no_spellcheck, $no_check_categories
 				) ;
-		
+			
 		if(exists $violations->{$requirement_file})
 			{
-			$violations_text = DumpTree($violations->{$requirement_file}, 'Violations:', DISPLAY_ADDRESS => 0) ;
-			$violations_text .= "\nDo not modify the violation text above, it will be automatically removed.\n" ;
-			$violations_text =~ s/^/# /mg ;
+			print DumpTree($violations->{$requirement_file}, "Error: Violations in '$requirement_file'", DISPLAY_ADDRESS => 0) ;
 			}
-		} ;
-	
-	if($@)
-		{
-		$violations_text = "Error parsing the file as a requirement (this message changes the error message line numbers):\n$@\n" ;
-		$violations_text .= "\nDo not modify the violation text above, it will be automatically removed.\n" ;
-		$violations_text =~ s/^/# /mg ;
-		}
-	
-		
-	$requirement_text = $violations_text . read_file($requirement_file) ;
-	}
-else
-	{
-	my ($requirement_name) = File::Basename::fileparse($requirement_file, ('\..*')) ;
-	
-	#todo: accept raw source
-	
-	if(defined $free_form_template)
-		{
-		my $violations 
-			= check_requirement_file
-				(
-				$master_template_file, $master_categories_file, $free_form_template,
-				$no_spellcheck, $no_check_categories
-				) ;
-		
-		if(exists $violations->{$free_form_template})
-			{
-			croak DumpTree $violations->{$free_form_template}, "Error: free form template has errors, aborting:" ;
-			}
-		else
-			{
-			$requirement_text = read_file($free_form_template) ;
-			
-			$requirement_text =~ s/'NAME'\s+=>\s'[^']*'/NAME => '$requirement_name'/ ;
-			}
-		}
-	else
-		{
-		# create requirement from master template
-
-		my $requirement_template = load_master_template($master_template_file)->{REQUIREMENT} ;
-		
-		my $requirement = create_requirement($requirement_template , {NAME => $requirement_name, ORIGINS =>['']}) ;
-		
-		$requirement_text = Dumper $requirement ;
-		$requirement_text =~ s/\$VAR1 =// ;
-		$requirement_text =~ s/^\s*//gm ;
-		}
-	}
-	
-eval
-	{
-	my $edited_requirement_text = Proc::InvokeEditor->edit($requirement_text, '.pl') ;
-
-	# save backup
-	write_file("$requirement_file.bak", $requirement_text) unless $no_backup ;
-
-	# remove violation message
-	$edited_requirement_text =~ s/\Q$violations_text// ;
-	
-	# save edited requirement
-	write_file($requirement_file, $edited_requirement_text) ;
-
-	# check
-	my $violations = check_requirement_file
-			(
-			$master_template_file, $master_categories_file, $requirement_file,
-			$no_spellcheck, $no_check_categories
-			) ;
-		
-	if(exists $violations->{$requirement_file})
-		{
-		print DumpTree($violations->{$requirement_file}, 'Violations remaining in requirement:', DISPLAY_ADDRESS => 0) ;
 		}
 	} ;
 	
@@ -252,5 +257,55 @@ unless($no_check_categories)
 	}
 	
 return $violations ;	
+}
+
+use File::Temp qw(tempfile);
+File::Temp->safe_level( File::Temp::HIGH );
+
+
+sub edit_in_vi 
+{
+my $options = shift; 
+my $files = shift ; # list of file_name/strings
+
+my @temporary_files  ;
+
+for my $file (@{ $files }) 
+	{
+	my ($file_name, $text) = @{ $file } ;
+
+	my ($template) = File::Basename::fileparse($file_name, ('\..*')) ;
+
+	# create a temporary file
+	my ($fh, $temporary_file_name) = tempfile($template . '_XXXX' , UNLINK => 1, SUFFIX => '.pl');
+	print $fh $text;
+	close $fh or die "Couldn't close temporary file [$temporary_file_name]; $!";
+
+	push @temporary_files, $temporary_file_name ;
+	push @{ $file }, $temporary_file_name ;
+	}
+
+# start the editor
+my $rc = system 'vi', $options, @temporary_files;
+
+# check what happened - die if it all went wrong.
+unless ($rc == 0) 
+	{
+	my ($exit_value, $signal_num, $dumped_core);
+	$exit_value = $? >> 8;
+	$signal_num = $? & 127;
+	$dumped_core = $? & 128;
+	die "Error in editor - exit val = $exit_value, signal = $signal_num, coredump? = $dumped_core: $!";
+	}
+
+for my $file (@{ $files }) 
+	{
+	my ($file_name, $text, $violations, $temp_file_name) = @{ $file } ;
+
+	# read the temp file
+	push @{ $file }, join('', read_file($temp_file_name)) ;
+	}
+
+return ;
 }
 

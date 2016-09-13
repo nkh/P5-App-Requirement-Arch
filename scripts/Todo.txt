@@ -1,12 +1,16 @@
 TODO:
 -----
 
+* editor
+	use editor that allows multiple files open
+	open category temple in editor
+
 *documentation
 	architecture and relations between the script
 	output examples
 
 *input
-	make 'ordered' available fro the requirement module
+	make 'ordered' available from the requirement module
 	
 * validation
 	check the category definition => can't start with /
