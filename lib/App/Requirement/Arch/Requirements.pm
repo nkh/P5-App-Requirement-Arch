@@ -521,7 +521,15 @@ my ($master_template, $file) = @_ ;
 
 my $violations = {} ;
 
-my $requirement = do $file ; 
+my $syntax_error = '' ;
+my $requirement = 
+	eval 
+	{
+	my $return = do $file ; 
+	$syntax_error = $@ if $@;
+	
+	$return ;
+	} ;
 
 if(defined $requirement) 
 	{
@@ -538,7 +546,7 @@ if(defined $requirement)
 	}
 else
 	{
-	$violations->{$file}{errors} = ["Error: can't parse requirement file '$file'\n"] ;
+	$violations->{$file}{errors} = ["Error: $syntax_error"] ;
 	}
 
 $requirement->{_LOADED_FROM} = $file ;
@@ -634,16 +642,23 @@ See C<xxx>.
 
 =cut
 
-my ($master_template_file, $sources) = @_ ;
+my ($master_template_file, $invalid_requirement_list, $sources) = @_ ;
 
 my ($files, $ok_parsed, $requirements_with_errors, $violations) = get_requirements_violations($master_template_file, $sources) ;
 
-for my $file (sort keys %{ $violations })
+if($invalid_requirement_list)
 	{
-	print DumpTree($violations->{$file}, "Violations for '$file':", DISPLAY_ADDRESS => 0) ;
+	print join("\n", sort keys %{ $violations }) . "\n" ;
 	}
+else
+	{
+	for my $file (sort keys %{ $violations })
+		{
+		print DumpTree($violations->{$file}, "Violations for '$file':", DISPLAY_ADDRESS => 0) ;
+		}
 
-print pluralize ("{No|%d} requirement{s||s} found. {No|%d} valid requirement{s||s}\n", scalar(@{$files}), $ok_parsed - $requirements_with_errors) ;
+	print pluralize ("{No|%d} requirement{s||s} found. {No|%d} valid requirement{s||s}\n", scalar(@{$files}), $ok_parsed - $requirements_with_errors) ;
+	}
 
 return $requirements_with_errors ;
 }

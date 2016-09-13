@@ -24,7 +24,8 @@ DESCRIPTION
 	template.
 
 ARGUMENTS
-	--master_template_file  file containing the master template
+	--master_template_file       file containing the master template
+	--invalid_requirement_list  list all the invalid requirements
 
 AUTHORS
 	Khemir Nadim ibn Hamouda
@@ -38,12 +39,13 @@ exit(1) ;
 
 use Getopt::Long;
 
-my ($master_template_file, $master_categories_file) ;
+my ($master_template_file, $invalid_requirement_list, $master_categories_file) ;
 
 die 'Error parsing options!'unless 
 	GetOptions
 		(
 		'master_template_file=s' => \$master_template_file,
+		'invalid_requirement_list' => \$invalid_requirement_list,
 		'h|help' => \&display_help, 
 		
 		'dump_options' => 
@@ -52,6 +54,7 @@ die 'Error parsing options!'unless
 				print join "\n", map {"-$_"} 
 					qw(
 					master_template_file
+					invalid_requirement_list
 					help
 					) ;
 				exit(0) ;
@@ -62,7 +65,7 @@ die 'Error parsing options!'unless
 
 display_help() unless @ARGV ;
 
-my $all_valid = check_requirements($master_template_file, \@ARGV) ;
+my $all_valid = check_requirements($master_template_file, $invalid_requirement_list, \@ARGV) ;
 exit($all_valid) ;
 
 
