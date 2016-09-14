@@ -226,6 +226,8 @@ my ($package) = caller() ;
 
 unless(defined $package)
 	{
+	my $mode = $ARGV[0] // 0 ;
+
 	my ($missing_definitions, $number_of_categories) = (0, 0) ;
 
 	my $display_filter = sub
@@ -241,7 +243,14 @@ unless(defined $package)
 
 			if($valid_definition)
 				{
-				return(Data::TreeDumper::DefaultNodesToDisplay($tree)) ;
+				if( 1 == $mode )
+					{
+					return('HASH', $tree, sort grep {! /^_/} keys %$tree) ; 
+					}
+				else
+					{
+					return(Data::TreeDumper::DefaultNodesToDisplay($tree)) ;
+					}
 				}
 			else
 				{

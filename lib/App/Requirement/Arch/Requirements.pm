@@ -351,7 +351,7 @@ for (@{$requirement->{SUB_REQUIREMENTS} || []})
 	}
 
 my ($basename, $path, $ext) = File::Basename::fileparse($file, ('\..*')) ;
-push @{ $violations{$file}{errors} }, 'NAME field and file name mismatch' unless ($requirement->{NAME} eq $basename);
+push @{ $violations{$file}{errors} }, "NAME field and file name mismatch: $basename" unless ($requirement->{NAME} eq $basename);
 
 return $requirement, \%violations ;
 }

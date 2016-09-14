@@ -1,9 +1,4 @@
-TODO:
------
 
-* editor
-	use editor that allows multiple files open
-	open category temple in editor
 
 *documentation
 	architecture and relations between the script
@@ -42,6 +37,10 @@ TODO:
 
 DONE:	
 -----
+* editor
+	use editor that allows multiple files open
+	open category temple in editor
+
 Scripts:
 	merge display_requirements_sorted_by_abstraction_level.pl and
 		display_requirements_sorted_by_abstraction_level_and_top_level_category.pl

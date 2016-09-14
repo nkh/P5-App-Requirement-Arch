@@ -44,7 +44,6 @@ ARGUMENTS
   --free_form_template       user defined template matching the master template
   --no_check_categories      do not check the requirement categories
   --no_spellcheck            perform no spellchecking
-  --no_backup                do not save a backup file
   --no_file_ok               do nothing if no path to requirement is given
 
 FILES
@@ -63,7 +62,7 @@ exit(1) ;
 #------------------------------------------------------------------------------------------------------------------
 
 my ($master_template_file, $master_categories_file, $free_form_template) ;
-my ($no_spellcheck, $raw, $no_backup, $no_check_categories, $no_file_ok) ;
+my ($no_spellcheck, $raw, $no_check_categories, $no_file_ok) ;
 
 die 'Error parsing options!'unless 
 	GetOptions
@@ -73,7 +72,6 @@ die 'Error parsing options!'unless
 		'free_form_template=s' => \$free_form_template,
 		'no_spellcheck' => \$no_spellcheck,
 		'raw=s' => \$raw,
-		'no_backup' => \$no_backup,
 		'no_check_categories' => \$no_check_categories,
 		'no_file_ok' => \$no_file_ok,
 		'h|help' => \&display_help, 
@@ -88,7 +86,6 @@ die 'Error parsing options!'unless
 					free_form_template
 					no_spellcheck
 					raw
-					no_backup
 					no_check_categories
 					no_file_ok
 					help
@@ -187,14 +184,11 @@ for my $requirement_file (@ARGV)
 	
 eval
 	{
-	edit_in_vi('-p', \@files) ;
+	edit_in_vi('-p', $master_categories_file, \@files) ;
 
 	for my $file (@files) 
 		{
 		my ($requirement_file, $requirement_text, $violations_text, undef, $edited_requirement_text) = @{ $file } ;
-
-		# save backup, will contain the old violations
-		write_file("$requirement_file.bak", $requirement_text) unless $no_backup ;
 
 		# remove violation message
 		$edited_requirement_text =~ s/\Q$violations_text// ;
@@ -266,6 +260,8 @@ File::Temp->safe_level( File::Temp::HIGH );
 sub edit_in_vi 
 {
 my $options = shift; 
+my $master_categories_file = shift; 
+
 my $files = shift ; # list of file_name/strings
 
 my @temporary_files  ;
@@ -285,8 +281,14 @@ for my $file (@{ $files })
 	push @{ $file }, $temporary_file_name ;
 	}
 
+# create a temporary rendering of categories
+my ($fh, $master_categories) = tempfile('master_categories_XXXX' , UNLINK => 1);
+`/usr/bin/env perl $master_categories_file 1 > $master_categories` ;
+`echo '# vi:syntax=no' >> $master_categories` ;
+close $fh or die "Couldn't close temporary file [$master_categories]; $!";
+
 # start the editor
-my $rc = system 'vi', $options, @temporary_files;
+my $rc = system 'vi', $options, @temporary_files, $master_categories, $master_categories_file ;
 
 # check what happened - die if it all went wrong.
 unless ($rc == 0) 
