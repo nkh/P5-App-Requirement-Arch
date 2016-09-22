@@ -351,7 +351,14 @@ for (@{$requirement->{SUB_REQUIREMENTS} || []})
 	}
 
 my ($basename, $path, $ext) = File::Basename::fileparse($file, ('\..*')) ;
-push @{ $violations{$file}{errors} }, "NAME field and file name mismatch: $basename" unless ($requirement->{NAME} eq $basename);
+my $NAME_underscore = $requirement->{NAME} =~ tr/ /_/ ;
+
+if($requirement->{NAME} ne $basename && $NAME_underscore ne $basename)
+	{
+	print STDERR "   git mv '$file' '$path$requirement->{NAME}$ext'\n\n" ;
+
+	push @{ $violations{$file}{errors} }, "NAME field and file name mismatch: $basename" ;
+	}
 
 return $requirement, \%violations ;
 }

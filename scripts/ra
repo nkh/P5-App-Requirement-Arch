@@ -105,7 +105,7 @@ bless $chained_app, $class ;
 
 $chained_app->parse_command_line() ;
 
-my $exit_code = $chained_app->SUPER::run() ;
+my $exit_code = $chained_app->SUPER::run() // 0 ;
 
 exit $exit_code ;
 }

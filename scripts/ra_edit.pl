@@ -62,7 +62,7 @@ exit(1) ;
 #------------------------------------------------------------------------------------------------------------------
 
 my ($master_template_file, $master_categories_file, $free_form_template) ;
-my ($no_spellcheck, $raw, $no_check_categories, $no_file_ok) ;
+my ($user_dictionary, $no_spellcheck, $raw, $no_check_categories, $no_file_ok) ;
 
 die 'Error parsing options!'unless 
 	GetOptions
@@ -70,6 +70,7 @@ die 'Error parsing options!'unless
 		'master_template_file=s' => \$master_template_file,
 		'master_categories_file=s' => \$master_categories_file,
 		'free_form_template=s' => \$free_form_template,
+		'user_dictionary=s' => \$user_dictionary,
 		'no_spellcheck' => \$no_spellcheck,
 		'raw=s' => \$raw,
 		'no_check_categories' => \$no_check_categories,
@@ -84,6 +85,7 @@ die 'Error parsing options!'unless
 					master_template_file
 					master_categories_file
 					free_form_template
+					user_dictionary
 					no_spellcheck
 					raw
 					no_check_categories
@@ -117,7 +119,7 @@ for my $requirement_file (@ARGV)
 				= check_requirement_file
 					(
 					$master_template_file, $master_categories_file, $requirement_file,
-					$no_spellcheck, $no_check_categories
+					$user_dictionary, $no_spellcheck, $no_check_categories
 					) ;
 			
 			if(exists $violations->{$requirement_file})
@@ -150,7 +152,7 @@ for my $requirement_file (@ARGV)
 				= check_requirement_file
 					(
 					$master_template_file, $master_categories_file, $free_form_template,
-					$no_spellcheck, $no_check_categories
+					$user_dictionary, $no_spellcheck, $no_check_categories
 					) ;
 			
 			if(exists $violations->{$free_form_template})
@@ -181,7 +183,8 @@ for my $requirement_file (@ARGV)
 	push @files, [$requirement_file, $requirement_text, $violations_text] ;
 	}
 
-	
+
+print STDERR "\n\n========== POST EDIT ===========\n\n" ;	
 eval
 	{
 	edit_in_vi('-p', $master_categories_file, \@files) ;
@@ -200,7 +203,7 @@ eval
 		my $violations = check_requirement_file
 				(
 				$master_template_file, $master_categories_file, $requirement_file,
-				$no_spellcheck, $no_check_categories
+				$user_dictionary, $no_spellcheck, $no_check_categories
 				) ;
 			
 		if(exists $violations->{$requirement_file})
@@ -221,7 +224,7 @@ sub check_requirement_file
 my
 (
 $master_template_file, $master_categories_file, $requirement_file,
-$no_spellcheck, $no_check_categories
+$user_dictionary, $no_spellcheck, $no_check_categories
 ) = @_ ;
 
 my ($files, $ok_parsed, $requirements_with_errors, $violations) 
@@ -230,7 +233,7 @@ my ($files, $ok_parsed, $requirements_with_errors, $violations)
 
 unless($no_spellcheck)
 	{
-	my ($file_name_errors, $errors_per_file) = spellcheck($requirement_file) ;
+	my ($file_name_errors, $errors_per_file) = spellcheck($requirement_file, $user_dictionary) ;
 
 	$violations->{$requirement_file}{spellchecking_errors} = $errors_per_file->{$requirement_file} if exists $errors_per_file->{$requirement_file}
 	}

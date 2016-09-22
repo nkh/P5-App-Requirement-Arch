@@ -497,7 +497,7 @@ else
 	     
 	for my $directory (@parent_directories, home() . '/.ra', home() . '/.ra/templates', )
 		{    
-		print "INFO: potential directory '$directory'\n" if $display_search ;
+		print STDERR "INFO: potential directory '$directory'\n" if $display_search ;
 
 		my $potential_file = $directory . '/' . $file_name ; 
 		
@@ -511,7 +511,7 @@ else
 	$found_file ||= $file_name ;
 	}
 	
-print "INFO: using '$found_file'.\n" if $display_search ;
+print STDERR "INFO: using '$found_file'.\n" if $display_search ;
 
 return $found_file ;
 }
