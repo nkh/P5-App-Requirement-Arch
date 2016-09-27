@@ -91,7 +91,7 @@ my ($ok_parsed, $errors, $entries_with_wrong_type, $requirements_structure, $cat
 
 for my $file (get_files_to_check($sources))
 	{
-	my ($requirement, $violations) = load_requirement($master_template, $file) ;
+	my ($requirement, $giolations) = load_requirement($master_template, $file) ;
 	
 	unless (defined $requirement)
 		{
@@ -279,7 +279,7 @@ my ($template_definition, $requirement, $file ) = @_ ;
 
 return undef unless($requirement) ;  # fail
 	
-my (%violations) ;
+my (%violations, %solutions) ;
 
 #~ print DumpTree $requirement, $file	;
 
@@ -355,9 +355,11 @@ my $NAME_underscore = $requirement->{NAME} =~ tr/ /_/ ;
 
 if($requirement->{NAME} ne $basename && $NAME_underscore ne $basename)
 	{
-	print STDERR "   git mv '$file' '$path$requirement->{NAME}$ext'\n\n" ;
-
-	push @{ $violations{$file}{errors} }, "NAME field and file name mismatch: $basename" ;
+	push @{ $violations{$file}{errors} }, 
+		[
+		"NAME field and file name mismatch: $basename", 
+		"   git mv '$file' '$path$requirement->{NAME}$ext'\n\n",
+		] ;
 	}
 
 return $requirement, \%violations ;
@@ -398,6 +400,7 @@ my ($ok_parsed, $requirements_with_errors, %all_violations) = (0, 0) ;
 for my $file (@files)
 	{
 	my ($requirement, $violations) = load_requirement($master_template, $file) ;
+
 
 	if(defined $requirement) 
 		{

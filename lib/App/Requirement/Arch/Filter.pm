@@ -132,7 +132,7 @@ unless($include_statistics)
 
 for my $requirement_name (keys %{$requirements})
 	{
-	delete $requirements->{$requirement_name}{DEFINED_AT} ;
+	#delete $requirements->{$requirement_name}{DEFINED_AT} ;
 	
 	if($include_description_data)
 		{

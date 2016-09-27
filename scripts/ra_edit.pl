@@ -184,11 +184,13 @@ for my $requirement_file (@ARGV)
 	}
 
 
-print STDERR "\n\n========== POST EDIT ===========\n\n" ;	
 eval
 	{
 	edit_in_vi('-p', $master_categories_file, \@files) ;
 
+	my $solutions = '' ;
+
+	my $solution_index = 0 ;	
 	for my $file (@files) 
 		{
 		my ($requirement_file, $requirement_text, $violations_text, undef, $edited_requirement_text) = @{ $file } ;
@@ -200,17 +202,29 @@ eval
 		write_file($requirement_file, $edited_requirement_text) ;
 
 		# check
+		print STDERR "===== POST EDIT =====\n\n" ;	
+
 		my $violations = check_requirement_file
 				(
 				$master_template_file, $master_categories_file, $requirement_file,
 				$user_dictionary, $no_spellcheck, $no_check_categories
 				) ;
-			
+		
 		if(exists $violations->{$requirement_file})
 			{
+
 			print DumpTree($violations->{$requirement_file}, "Error: Violations in '$requirement_file'", DISPLAY_ADDRESS => 0) ;
+			
+			print "\n" ;
+
+			for my $error ( @{$violations->{$requirement_file}{errors} })
+				{
+				$solutions .= ' (' . $solution_index++ . ')  ' . $error->[1] . "\n" if ('ARRAY' eq ref $error) ;
+				}
 			}
 		}
+
+		print $solutions ;
 	} ;
 	
 die $@ if $@ ;

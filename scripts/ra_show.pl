@@ -45,15 +45,19 @@ ARGUMENTS
   
   --format                      set the output format
   
-	dhtml: structured DHTML output
-		--show_abstraction_level  include the abstraction level in
-					  the output
-		--requirement_fields_filter_file
+      dhtml: structured DHTML output
 
-	text: structured text output
-		--show_abstraction_level  include the abstraction level in
-					  the output
-		--requirement_fields_filter_file
+        --show_abstraction_level  include the abstraction level in the output
+	--requirement_fields_filter_file
+
+      text: structured text output
+
+	--show_abstraction_level  include the abstraction level in the output
+	--requirement_fields_filter_file
+
+      raw: extract fields from requirements
+
+	--requirement_fields_filter_file
 	
   --include_description_data    include the following fields in the output
 				  ORIGIN
@@ -141,6 +145,7 @@ die 'Error parsing options!'unless
 					master_template_file
 					master_categories_file
 					requirement_fields_filter_file
+					field
 					help
 					) ;
 				exit(0) ;
@@ -167,51 +172,40 @@ $flat_requirement_fields_filter_file = home() . '/.ra/field_filters/flat_require
 my %requirement_fields = (get_filter_data($requirement_fields_filter_file, ['ORIGINS', 'DESCRIPTION', 'LONG_DESCRIPTION', 'RATIONALE'])) ;
 $requirement_fields{'_LOADED_FROM'} = 1 if $include_loaded_from ;
 
+my ($requirements_structure, $requirements, $categories) 
+	= load_and_filter_requirements
+		(
+		$sources,
+		$master_template_file,
+		$master_categories_file,
+		$show_abstraction_level,
+		$remove_empty_requirement_field_in_categories,
+		$include_not_found,
+		$include_statistics,
+		$include_description_data,
+		\%requirement_fields,
+		1,  #$display_multiline_as_array,
+		$include_categories,
+		\@include_types,
+		) ;
+
 for($format)
 	{
 	/^text/ and do
 		{
-		my ($requirements_structure, $requirements, $categories) 
-			= load_and_filter_requirements
-				(
-				$sources,
-				$master_template_file,
-				$master_categories_file,
-				$show_abstraction_level,
-				$remove_empty_requirement_field_in_categories,
-				$include_not_found,
-				$include_statistics,
-				$include_description_data,
-				\%requirement_fields,
-				1,  #$display_multiline_as_array,
-				$include_categories,
-				\@include_types,
-				) ;
-
 		generate_text_document($requirements_structure) ;
 		last ;
 		} ;
 	
 	/^dhtml/ and do
 		{
-		my ($requirements_structure, $requirements, $categories)
-			= load_and_filter_requirements
-				(
-				$sources,
-				$master_template_file,
-				$master_categories_file,
-				$show_abstraction_level,
-				$remove_empty_requirement_field_in_categories,
-				$include_not_found,
-				$include_statistics,
-				$include_description_data,
-				\%requirement_fields,
-				1, #$display_multiline_as_array,
-				$include_categories,
-				\@include_types,
-				) ;
-				
 		generate_dhtml_document($requirements_structure) ;
+		last ;
+		} ;
+		
+	/^raw/ and do
+		{
+		generate_raw_document($requirements) ;
 		last ;
 		} ;
 		
@@ -227,7 +221,7 @@ my ($filter_file, $default_filter) = @_ ;
 
 my @filter_data ;
 
-if(-f $filter_file)
+if(-e $filter_file)
 	{
 	@filter_data = do $filter_file or warn "Warning: Can't load fields filter file '$filter_file': $@\nUsing default filter.\n" ;
 	}
@@ -238,6 +232,40 @@ else
 	}
 
 return @filter_data ;
+}
+
+#-------------------------------------------------------------------------------
+
+sub generate_raw_document
+{
+my ($requirements) = @_ ;
+
+for my $requirement_name ( sort keys %{ $requirements } )
+	{
+	#sub reauirements and related requirements are returned even if they don't exist
+	if (exists $requirements->{$requirement_name}{DEFINED_AT})
+		{	
+		print "DEFINED_AT $requirements->{$requirement_name}{DEFINED_AT}\n" ; 
+		}
+	else
+		{	
+		print "DEFINED_AT 'missing definition (sub or related requirement)'" ; 
+		}
+
+
+	print "NAME    $requirement_name\n" ;
+
+	for my $requirement_field ( sort keys %{ $requirements->{$requirement_name}{DEFINITION} }  )
+		{
+		if(@{ $requirements->{$requirement_name}{DEFINITION}{$requirement_field} })
+			{
+			print "\t$requirement_field\n\t",
+				join "\n\t", @{ $requirements->{$requirement_name}{DEFINITION}{$requirement_field} },
+				"\n" ;
+			}
+		}
+	print "\n\n" ;
+	} 
 }
 
 #-------------------------------------------------------------------------------
