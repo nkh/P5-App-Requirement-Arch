@@ -45,9 +45,9 @@ App::Requirement::Arch - Easy requirements creation and handling
 
 =head1 BACKGROUND
 
-This module is the result of discussions I have had with friends and collegues. Kolbjörn Gripner, Johan Nat och Dag and Cristian Pendelton 
+This module is the result of discussions I have had with friends and collegues. KolbjÃ¶rn Gripner, Johan Nat och Dag and Cristian Pendelton 
 (to name a few) and I have had heated discussions about how important requirements are and how they should be handled. One common 
-trait we share is that we believe requirements are very important and demand a lot of serious work. The reward is great put the effort to 
+trait we share is that we believe requirements are very important and demand a lot of serious work. The reward is great but the effort to 
 be put into requirement gathering, prioritizing, categorizing, reviewing, following down to testing is an activity seen as a burden by too many.
 
 By far the greatest challenge to good requirement, and thus to the production of professional application or service, is cultural. Product 
@@ -59,7 +59,7 @@ simplistic (todos, error DBs, ...). Here too, development culture and resistance
 
 We believe we need a system to make requirement handling more attractive so people are 'happy' to work with requirement.
 
-Multidimensional_Requirement_Database.pod, a document writen by Kolbjörn, is an interresting read wich shows what goes on into the 
+Multidimensional_Requirement_Database.pod, a document writen by KolbjÃ¶rn, is an interresting read wich shows what goes on into the 
 head of someone who is deeply involved with requirement gathering. Although the format is dry, it is an excellent analysis  of what a better
 requirement handling process and tools should handle.
 
@@ -160,14 +160,14 @@ TODO: add a comment entry in each field so it can be displayed as help to the us
 
 =head3 Verification
 
-Once you have created your requirement you can check it's validity with tthe B<ra_check> application. You can check multiple requirement
-simulteanously.
+Once you have created your requirement you can check it's validity with the B<ra_check> application. You can check multiple requirement
+simultaneously.
 
 B<ra_check> will report the following
 
 =head4 Format error
 
-The syntax you used is not valid. This happends if you forget a comma or have unbalanced braces, ...
+The syntax you used is not valid. This happens if you forget a comma or have unbalanced braces, ...
 
 =head4 Errorneous  fields
 

@@ -2,6 +2,75 @@
 # This is Todo.txt #
 #------------------#
 
+stake holder interface vs end-user interface
+
+format, input, feedback, process, generation
+
+social process
+	voting, reviewing
+
+multiuser interaction
+
+requirement priority negotiation
+
+multimedia
+
+dynamic placement of requirement in its context
+	a new requirement is displayed in it context
+
+navigation
+	requirement placed in its context also has hyperlinks to jump to other context levels
+
+non defined sub requirements are show in context
+
+tracking from test back to requirements
+
+distributed databases (plural as we may reuse some)
+	sub git?
+	where does one store the referred documents that are not requirements themselves
+
+comparison with task applications
+
+usage of colors
+
+folding of sub levels
+
+status prompt
+
+multiple simultaneous input formats
+	reuse requirements that were in another format
+
+input format is user frienly, eg not a perl data structure, for non developers
+	indented text
+	markdown
+	...
+
+multiple tools
+	vi, browser, text mode browser vs ncurses 
+
+
+reorder data structure on the command line
+
+integrate output, in other documents
+integrate other document to the output
+
+create requirements on the command line
+add/modify  fields on the command line
+ 
+find based on fields content
+display only specific fields
+
+edit only specific fields
+
+custom view of requirements
+
+custom selection of requirements to work with
+
+elicitaton/review process
+
+
+
+
 # loading master templates and master categories should find the first template in the directory hierarchy as does spellcheck
 
 

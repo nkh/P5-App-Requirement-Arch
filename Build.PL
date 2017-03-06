@@ -195,6 +195,7 @@ my $build = $class->new
 		'Readonly'         => 0,
 		'Sub::Exporter'     => 0,
 		'Check::ISA'              => '0.04',
+		'Data::Compare' => 0,
 		'Data::TreeDumper' => 0,
 		'Data::TreeDumper::Utils' => 0,
 		'Data::TreeDumper::Renderer::DHTML' => 0,

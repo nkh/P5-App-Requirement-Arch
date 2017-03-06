@@ -242,18 +242,7 @@ my ($requirements) = @_ ;
 
 for my $requirement_name ( sort keys %{ $requirements } )
 	{
-	#sub reauirements and related requirements are returned even if they don't exist
-	if (exists $requirements->{$requirement_name}{DEFINED_AT})
-		{	
-		print "DEFINED_AT $requirements->{$requirement_name}{DEFINED_AT}\n" ; 
-		}
-	else
-		{	
-		print "DEFINED_AT 'missing definition (sub or related requirement)'" ; 
-		}
-
-
-	print "NAME    $requirement_name\n" ;
+	printf "NAME %-79s\n", $requirement_name ;
 
 	for my $requirement_field ( sort keys %{ $requirements->{$requirement_name}{DEFINITION} }  )
 		{
@@ -264,7 +253,20 @@ for my $requirement_name ( sort keys %{ $requirements } )
 				"\n" ;
 			}
 		}
-	print "\n\n" ;
+
+	#sub requirements and related requirements are returned even if they don't exist
+	if (exists $requirements->{$requirement_name}{DEFINED_AT})
+		{	
+		print "DEFINED_AT $requirements->{$requirement_name}{DEFINED_AT}\n" ; 
+		}
+	else
+		{	
+		print "DEFINED_AT 'missing definition (sub or related requirement)'" ; 
+		}
+
+
+	#print "\n\n" ;
+	print "\0" ;
 	} 
 }
 
