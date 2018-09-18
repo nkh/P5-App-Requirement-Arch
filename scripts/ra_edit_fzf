@@ -1,0 +1,3 @@
+#!/bin/bash
+
+fzf | parallel -X --tty ra_edit.pl

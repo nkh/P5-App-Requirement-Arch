@@ -2,6 +2,13 @@
 # This is Todo.txt #
 #------------------#
 
+ra_grep
+	option to display the matching line
+	-i per pattern
+	AND pattern instead for OR
+
+	patterns are not found, ie 3rd in PBS2 requirements
+
 stake holder interface vs end-user interface
 
 format, input, feedback, process, generation

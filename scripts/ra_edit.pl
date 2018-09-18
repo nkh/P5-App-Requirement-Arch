@@ -271,7 +271,7 @@ return $violations ;
 }
 
 use File::Temp qw(tempfile);
-File::Temp->safe_level( File::Temp::HIGH );
+File::Temp->safe_level( File::Temp::STANDARD );
 
 
 sub edit_in_vi 

@@ -22,7 +22,7 @@ NAME
   ra_grep
 
 SYNOPSIS
-  $ ra_grep -l -r -p pattern -i -p perl_pattern [[path_spec]/[file_spec]] [[path_spec]/[file_spec]] ...
+  $ ra_grep -1 -r -p pattern -i -p perl_pattern [[path_spec]/[file_spec]] [[path_spec]/[file_spec]] ...
 
 DESCRIPTION
   This utility search for patterns in requirement files and display them. The 
@@ -191,7 +191,7 @@ unless($silent)
 		}
 	else
 		{
-		print DumpTree \%tree, 'Matches:', DISPLAY_ADDRESS => 0 ;
+		print DumpTree \%tree, 'Matches:', DISPLAY_ADDRESS => 0, DISPLAY_NO_VALUE => 1 ;
 		}
 		
 	print 'Summary: ' . 

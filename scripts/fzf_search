@@ -1,2 +1,9 @@
-ra show requirements/sorted/ --include_type requirement --include_description_data  --format raw -requirement_fields_filter_file <(echo "'LONG_DESCRIPTION' => 1, 'DESCRIPTION' => 1") | perl -pe 's/^\s+$// ; s/\t/    /g' | perl -ne 'BEGIN {my $f} ; chomp ; if(/^DEFINED_AT (.+)/) {$f = $1; next} ; $cols = `tput cols`; $cols--  ; printf "%-${cols}s >>> $f\n", $_ ; ' | colout '(NAME)*(DESCRIPTION)*(LONG_)*' red,blue,blue | fzf --no-sort -m --ansi --preview-window down:3 --no-hscroll --preview "perl -e '\$ARGV[0] =~ />>> (.*)$/ ; print \$1' {} " | perl -pe ' s/^(.*>>> )//' | sort -u |  parallel -X --tty ra edit --user_dictionary PBS2_spellcheck_dictionary.txt
+ra show -- requirements/sorted/ --include_type requirement --include_description_data --format raw -requirement_fields_filter_file <(echo "'LONG_DESCRIPTION' => 1, 'DESCRIPTION' => 1") | perl -pe 's/^\s+$// ; s/\t/ /g' | perl -ne 'BEGIN {my $f} ; chomp ; if(/^DEFINED_AT (.+)/) {$f = $1; next} ; $cols = `tput cols`; $cols-- ; printf "%-${cols}s >>> $f\n", $_ ; ' | piper NAME red LONG_DESCRIPTION blue DESCRIPTION blue | fzf --no-sort -m --ansi --preview-window down:3 --no-hscroll --preview "perl -e '\$ARGV[0] =~/ />>> (.*)$/ ; print \$1' {} " | perl -pe ' s/^(.*>>> )//' | sort -u | parallel -X --tty ra edit --user_dictionary PBS2_spellcheck_dictionary.txt
+
+
+#ra show requirements/sorted/ --include_type requirement --include_description_data  --format raw -requirement_fields_filter_file <(echo "'LONG_DESCRIPTION' => 1, 'DESCRIPTION' => 1") | perl -pe 's/^\s+$// ; s/\t/    /g' | perl -ne 'BEGIN {my $f} ; chomp ; if(/^DEFINED_AT (.+)/) {$f = $1; next} ; $cols = `tput cols`; $cols--  ; printf "%-${cols}s >>> $f\n", $_ ; ' | colout '(NAME)*(DESCRIPTION)*(LONG_)*' red,blue,blue | fzf --no-sort -m --ansi --preview-window down:3 --no-hscroll --preview "perl -e '\$ARGV[0] =~ />>> (.*)$/ ; print \$1' {} " | perl -pe ' s/^(.*>>> )//' | sort -u |  parallel -X --tty ra edit --user_dictionary PBS2_spellcheck_dictionary.txt
+
+
+#ra_check.pl --invalid_requirement_list requirements/sorted/ 2>/dev/null | fzf -m | parallel -X --tty ra_edit.pl
+
 
